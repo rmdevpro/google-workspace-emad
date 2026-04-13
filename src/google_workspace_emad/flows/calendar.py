@@ -7,7 +7,7 @@ Ported from mads/brin/js/server.js (5 tools).
 import asyncio
 import logging
 
-from google_workspace_emad import brin_api_calls_total, brin_api_errors_total
+from google_workspace_emad import gws_api_calls_total, gws_api_errors_total
 from google_workspace_emad.google_client import get_calendar_service
 
 _log = logging.getLogger("google_workspace_emad")
@@ -53,10 +53,10 @@ async def list_events(
 
     try:
         result = await asyncio.to_thread(_sync)
-        brin_api_calls_total.labels(service="calendar", operation="list_events").inc()
+        gws_api_calls_total.labels(service="calendar", operation="list_events").inc()
         return result
     except (RuntimeError, OSError, ValueError) as exc:
-        brin_api_errors_total.labels(
+        gws_api_errors_total.labels(
             service="calendar", error_type=type(exc).__name__
         ).inc()
         return f"Error listing events: {exc}"
@@ -92,10 +92,10 @@ async def create_event(
 
     try:
         result = await asyncio.to_thread(_sync)
-        brin_api_calls_total.labels(service="calendar", operation="create").inc()
+        gws_api_calls_total.labels(service="calendar", operation="create").inc()
         return result
     except (RuntimeError, OSError, ValueError) as exc:
-        brin_api_errors_total.labels(
+        gws_api_errors_total.labels(
             service="calendar", error_type=type(exc).__name__
         ).inc()
         return f"Error creating event: {exc}"
@@ -133,10 +133,10 @@ async def update_event(
 
     try:
         result = await asyncio.to_thread(_sync)
-        brin_api_calls_total.labels(service="calendar", operation="update").inc()
+        gws_api_calls_total.labels(service="calendar", operation="update").inc()
         return result
     except (RuntimeError, OSError, ValueError) as exc:
-        brin_api_errors_total.labels(
+        gws_api_errors_total.labels(
             service="calendar", error_type=type(exc).__name__
         ).inc()
         return f"Error updating event: {exc}"
@@ -160,10 +160,10 @@ async def get_event(user_email: str, event_id: str) -> str:
 
     try:
         result = await asyncio.to_thread(_sync)
-        brin_api_calls_total.labels(service="calendar", operation="get").inc()
+        gws_api_calls_total.labels(service="calendar", operation="get").inc()
         return result
     except (RuntimeError, OSError, ValueError) as exc:
-        brin_api_errors_total.labels(
+        gws_api_errors_total.labels(
             service="calendar", error_type=type(exc).__name__
         ).inc()
         return f"Error getting event: {exc}"
@@ -185,12 +185,12 @@ async def list_calendars(user_email: str) -> str:
 
     try:
         result = await asyncio.to_thread(_sync)
-        brin_api_calls_total.labels(
+        gws_api_calls_total.labels(
             service="calendar", operation="list_calendars"
         ).inc()
         return result
     except (RuntimeError, OSError, ValueError) as exc:
-        brin_api_errors_total.labels(
+        gws_api_errors_total.labels(
             service="calendar", error_type=type(exc).__name__
         ).inc()
         return f"Error listing calendars: {exc}"
@@ -206,10 +206,10 @@ async def delete_event(user_email: str, event_id: str) -> str:
 
     try:
         result = await asyncio.to_thread(_sync)
-        brin_api_calls_total.labels(service="calendar", operation="delete").inc()
+        gws_api_calls_total.labels(service="calendar", operation="delete").inc()
         return result
     except (RuntimeError, OSError, ValueError) as exc:
-        brin_api_errors_total.labels(
+        gws_api_errors_total.labels(
             service="calendar", error_type=type(exc).__name__
         ).inc()
         return f"Error deleting event: {exc}"

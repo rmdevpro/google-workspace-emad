@@ -13,7 +13,7 @@ from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from pathlib import Path
 
-from google_workspace_emad import brin_api_calls_total, brin_api_errors_total
+from google_workspace_emad import gws_api_calls_total, gws_api_errors_total
 from google_workspace_emad.google_client import get_gmail_service
 
 _log = logging.getLogger("google_workspace_emad")
@@ -58,10 +58,10 @@ async def read_messages(
 
     try:
         result = await asyncio.to_thread(_read_sync)
-        brin_api_calls_total.labels(service="gmail", operation="read").inc()
+        gws_api_calls_total.labels(service="gmail", operation="read").inc()
         return result
     except (RuntimeError, OSError, ValueError) as exc:
-        brin_api_errors_total.labels(
+        gws_api_errors_total.labels(
             service="gmail", error_type=type(exc).__name__
         ).inc()
         return f"Error reading Gmail: {exc}"
@@ -117,10 +117,10 @@ async def send_message(
 
     try:
         result = await asyncio.to_thread(_send_sync)
-        brin_api_calls_total.labels(service="gmail", operation="send").inc()
+        gws_api_calls_total.labels(service="gmail", operation="send").inc()
         return result
     except (RuntimeError, OSError, ValueError) as exc:
-        brin_api_errors_total.labels(
+        gws_api_errors_total.labels(
             service="gmail", error_type=type(exc).__name__
         ).inc()
         return f"Error sending Gmail: {exc}"

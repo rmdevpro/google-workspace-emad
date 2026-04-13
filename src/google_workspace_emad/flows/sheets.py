@@ -7,7 +7,7 @@ Ported from mads/brin/js/server.js (6 tools).
 import asyncio
 import logging
 
-from google_workspace_emad import brin_api_calls_total, brin_api_errors_total
+from google_workspace_emad import gws_api_calls_total, gws_api_errors_total
 from google_workspace_emad.google_client import get_sheets_service
 
 _log = logging.getLogger("google_workspace_emad")
@@ -38,10 +38,10 @@ async def read_range(
 
     try:
         result = await asyncio.to_thread(_sync)
-        brin_api_calls_total.labels(service="sheets", operation="read").inc()
+        gws_api_calls_total.labels(service="sheets", operation="read").inc()
         return result
     except (RuntimeError, OSError, ValueError) as exc:
-        brin_api_errors_total.labels(
+        gws_api_errors_total.labels(
             service="sheets", error_type=type(exc).__name__
         ).inc()
         return f"Error reading sheet: {exc}"
@@ -68,10 +68,10 @@ async def write_range(
 
     try:
         result = await asyncio.to_thread(_sync)
-        brin_api_calls_total.labels(service="sheets", operation="write").inc()
+        gws_api_calls_total.labels(service="sheets", operation="write").inc()
         return result
     except (RuntimeError, OSError, ValueError) as exc:
-        brin_api_errors_total.labels(
+        gws_api_errors_total.labels(
             service="sheets", error_type=type(exc).__name__
         ).inc()
         return f"Error writing sheet: {exc}"
@@ -98,10 +98,10 @@ async def append_rows(
 
     try:
         result = await asyncio.to_thread(_sync)
-        brin_api_calls_total.labels(service="sheets", operation="append").inc()
+        gws_api_calls_total.labels(service="sheets", operation="append").inc()
         return result
     except (RuntimeError, OSError, ValueError) as exc:
-        brin_api_errors_total.labels(
+        gws_api_errors_total.labels(
             service="sheets", error_type=type(exc).__name__
         ).inc()
         return f"Error appending to sheet: {exc}"
@@ -124,10 +124,10 @@ async def clear_range(
 
     try:
         result = await asyncio.to_thread(_sync)
-        brin_api_calls_total.labels(service="sheets", operation="clear").inc()
+        gws_api_calls_total.labels(service="sheets", operation="clear").inc()
         return result
     except (RuntimeError, OSError, ValueError) as exc:
-        brin_api_errors_total.labels(
+        gws_api_errors_total.labels(
             service="sheets", error_type=type(exc).__name__
         ).inc()
         return f"Error clearing range: {exc}"
@@ -144,10 +144,10 @@ async def create_spreadsheet(user_email: str, title: str) -> str:
 
     try:
         result = await asyncio.to_thread(_sync)
-        brin_api_calls_total.labels(service="sheets", operation="create").inc()
+        gws_api_calls_total.labels(service="sheets", operation="create").inc()
         return result
     except (RuntimeError, OSError, ValueError) as exc:
-        brin_api_errors_total.labels(
+        gws_api_errors_total.labels(
             service="sheets", error_type=type(exc).__name__
         ).inc()
         return f"Error creating spreadsheet: {exc}"
@@ -176,10 +176,10 @@ async def get_metadata(
 
     try:
         result = await asyncio.to_thread(_sync)
-        brin_api_calls_total.labels(service="sheets", operation="metadata").inc()
+        gws_api_calls_total.labels(service="sheets", operation="metadata").inc()
         return result
     except (RuntimeError, OSError, ValueError) as exc:
-        brin_api_errors_total.labels(
+        gws_api_errors_total.labels(
             service="sheets", error_type=type(exc).__name__
         ).inc()
         return f"Error getting metadata: {exc}"

@@ -7,7 +7,7 @@ Ported from mads/brin/js/server.js (2 tools).
 import asyncio
 import logging
 
-from google_workspace_emad import brin_api_calls_total, brin_api_errors_total
+from google_workspace_emad import gws_api_calls_total, gws_api_errors_total
 from google_workspace_emad.google_client import get_slides_service
 
 _log = logging.getLogger("google_workspace_emad")
@@ -41,10 +41,10 @@ async def get_presentation(user_email: str, presentation_id: str) -> str:
 
     try:
         result = await asyncio.to_thread(_sync)
-        brin_api_calls_total.labels(service="slides", operation="get").inc()
+        gws_api_calls_total.labels(service="slides", operation="get").inc()
         return result
     except (RuntimeError, OSError, ValueError) as exc:
-        brin_api_errors_total.labels(
+        gws_api_errors_total.labels(
             service="slides", error_type=type(exc).__name__
         ).inc()
         return f"Error getting presentation: {exc}"
@@ -61,10 +61,10 @@ async def create_presentation(user_email: str, title: str) -> str:
 
     try:
         result = await asyncio.to_thread(_sync)
-        brin_api_calls_total.labels(service="slides", operation="create").inc()
+        gws_api_calls_total.labels(service="slides", operation="create").inc()
         return result
     except (RuntimeError, OSError, ValueError) as exc:
-        brin_api_errors_total.labels(
+        gws_api_errors_total.labels(
             service="slides", error_type=type(exc).__name__
         ).inc()
         return f"Error creating presentation: {exc}"

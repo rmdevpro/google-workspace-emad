@@ -7,7 +7,7 @@ Ported from mads/brin/js/server.js (12 tools).
 import asyncio
 import logging
 
-from google_workspace_emad import brin_api_calls_total, brin_api_errors_total
+from google_workspace_emad import gws_api_calls_total, gws_api_errors_total
 from google_workspace_emad.google_client import get_drive_service
 
 _log = logging.getLogger("google_workspace_emad")
@@ -47,10 +47,10 @@ async def list_files(
 
     try:
         result = await asyncio.to_thread(_sync)
-        brin_api_calls_total.labels(service="drive", operation="list").inc()
+        gws_api_calls_total.labels(service="drive", operation="list").inc()
         return result
     except (RuntimeError, OSError, ValueError) as exc:
-        brin_api_errors_total.labels(
+        gws_api_errors_total.labels(
             service="drive", error_type=type(exc).__name__
         ).inc()
         return f"Error listing Drive files: {exc}"
@@ -84,10 +84,10 @@ async def search_files(
 
     try:
         result = await asyncio.to_thread(_sync)
-        brin_api_calls_total.labels(service="drive", operation="search").inc()
+        gws_api_calls_total.labels(service="drive", operation="search").inc()
         return result
     except (RuntimeError, OSError, ValueError) as exc:
-        brin_api_errors_total.labels(
+        gws_api_errors_total.labels(
             service="drive", error_type=type(exc).__name__
         ).inc()
         return f"Error searching Drive: {exc}"
@@ -112,10 +112,10 @@ async def create_folder(
 
     try:
         result = await asyncio.to_thread(_sync)
-        brin_api_calls_total.labels(service="drive", operation="create_folder").inc()
+        gws_api_calls_total.labels(service="drive", operation="create_folder").inc()
         return result
     except (RuntimeError, OSError, ValueError) as exc:
-        brin_api_errors_total.labels(
+        gws_api_errors_total.labels(
             service="drive", error_type=type(exc).__name__
         ).inc()
         return f"Error creating folder: {exc}"
@@ -131,10 +131,10 @@ async def delete_file(user_email: str, file_id: str) -> str:
 
     try:
         result = await asyncio.to_thread(_sync)
-        brin_api_calls_total.labels(service="drive", operation="delete").inc()
+        gws_api_calls_total.labels(service="drive", operation="delete").inc()
         return result
     except (RuntimeError, OSError, ValueError) as exc:
-        brin_api_errors_total.labels(
+        gws_api_errors_total.labels(
             service="drive", error_type=type(exc).__name__
         ).inc()
         return f"Error deleting file: {exc}"
@@ -162,10 +162,10 @@ async def get_file(user_email: str, file_id: str) -> str:
 
     try:
         result = await asyncio.to_thread(_sync)
-        brin_api_calls_total.labels(service="drive", operation="get").inc()
+        gws_api_calls_total.labels(service="drive", operation="get").inc()
         return result
     except (RuntimeError, OSError, ValueError) as exc:
-        brin_api_errors_total.labels(
+        gws_api_errors_total.labels(
             service="drive", error_type=type(exc).__name__
         ).inc()
         return f"Error getting file: {exc}"
@@ -188,10 +188,10 @@ async def move_file(user_email: str, file_id: str, new_parent_id: str) -> str:
 
     try:
         result = await asyncio.to_thread(_sync)
-        brin_api_calls_total.labels(service="drive", operation="move").inc()
+        gws_api_calls_total.labels(service="drive", operation="move").inc()
         return result
     except (RuntimeError, OSError, ValueError) as exc:
-        brin_api_errors_total.labels(
+        gws_api_errors_total.labels(
             service="drive", error_type=type(exc).__name__
         ).inc()
         return f"Error moving file: {exc}"
@@ -212,10 +212,10 @@ async def copy_file(user_email: str, file_id: str, new_name: str = "") -> str:
 
     try:
         result = await asyncio.to_thread(_sync)
-        brin_api_calls_total.labels(service="drive", operation="copy").inc()
+        gws_api_calls_total.labels(service="drive", operation="copy").inc()
         return result
     except (RuntimeError, OSError, ValueError) as exc:
-        brin_api_errors_total.labels(
+        gws_api_errors_total.labels(
             service="drive", error_type=type(exc).__name__
         ).inc()
         return f"Error copying file: {exc}"
@@ -233,10 +233,10 @@ async def rename_file(user_email: str, file_id: str, new_name: str) -> str:
 
     try:
         result = await asyncio.to_thread(_sync)
-        brin_api_calls_total.labels(service="drive", operation="rename").inc()
+        gws_api_calls_total.labels(service="drive", operation="rename").inc()
         return result
     except (RuntimeError, OSError, ValueError) as exc:
-        brin_api_errors_total.labels(
+        gws_api_errors_total.labels(
             service="drive", error_type=type(exc).__name__
         ).inc()
         return f"Error renaming file: {exc}"
@@ -258,12 +258,12 @@ async def list_shared_drives(user_email: str, limit: int = 20) -> str:
 
     try:
         result = await asyncio.to_thread(_sync)
-        brin_api_calls_total.labels(
+        gws_api_calls_total.labels(
             service="drive", operation="list_shared_drives"
         ).inc()
         return result
     except (RuntimeError, OSError, ValueError) as exc:
-        brin_api_errors_total.labels(
+        gws_api_errors_total.labels(
             service="drive", error_type=type(exc).__name__
         ).inc()
         return f"Error listing shared drives: {exc}"
@@ -289,10 +289,10 @@ async def list_permissions(user_email: str, file_id: str) -> str:
 
     try:
         result = await asyncio.to_thread(_sync)
-        brin_api_calls_total.labels(service="drive", operation="list_permissions").inc()
+        gws_api_calls_total.labels(service="drive", operation="list_permissions").inc()
         return result
     except (RuntimeError, OSError, ValueError) as exc:
-        brin_api_errors_total.labels(
+        gws_api_errors_total.labels(
             service="drive", error_type=type(exc).__name__
         ).inc()
         return f"Error listing permissions: {exc}"
@@ -310,12 +310,12 @@ async def remove_permission(user_email: str, file_id: str, permission_id: str) -
 
     try:
         result = await asyncio.to_thread(_sync)
-        brin_api_calls_total.labels(
+        gws_api_calls_total.labels(
             service="drive", operation="remove_permission"
         ).inc()
         return result
     except (RuntimeError, OSError, ValueError) as exc:
-        brin_api_errors_total.labels(
+        gws_api_errors_total.labels(
             service="drive", error_type=type(exc).__name__
         ).inc()
         return f"Error removing permission: {exc}"
@@ -337,10 +337,10 @@ async def share_file(
 
     try:
         result = await asyncio.to_thread(_sync)
-        brin_api_calls_total.labels(service="drive", operation="share").inc()
+        gws_api_calls_total.labels(service="drive", operation="share").inc()
         return result
     except (RuntimeError, OSError, ValueError) as exc:
-        brin_api_errors_total.labels(
+        gws_api_errors_total.labels(
             service="drive", error_type=type(exc).__name__
         ).inc()
         return f"Error sharing file: {exc}"

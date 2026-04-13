@@ -7,7 +7,7 @@ Ported from mads/brin/js/server.js (3 tools).
 import asyncio
 import logging
 
-from google_workspace_emad import brin_api_calls_total, brin_api_errors_total
+from google_workspace_emad import gws_api_calls_total, gws_api_errors_total
 from google_workspace_emad.google_client import get_docs_service
 
 _log = logging.getLogger("google_workspace_emad")
@@ -36,10 +36,10 @@ async def read_document(user_email: str, document_id: str) -> str:
 
     try:
         result = await asyncio.to_thread(_sync)
-        brin_api_calls_total.labels(service="docs", operation="read").inc()
+        gws_api_calls_total.labels(service="docs", operation="read").inc()
         return result
     except (RuntimeError, OSError, ValueError) as exc:
-        brin_api_errors_total.labels(
+        gws_api_errors_total.labels(
             service="docs", error_type=type(exc).__name__
         ).inc()
         return f"Error reading document: {exc}"
@@ -69,10 +69,10 @@ async def write_document(user_email: str, document_id: str, content: str) -> str
 
     try:
         result = await asyncio.to_thread(_sync)
-        brin_api_calls_total.labels(service="docs", operation="write").inc()
+        gws_api_calls_total.labels(service="docs", operation="write").inc()
         return result
     except (RuntimeError, OSError, ValueError) as exc:
-        brin_api_errors_total.labels(
+        gws_api_errors_total.labels(
             service="docs", error_type=type(exc).__name__
         ).inc()
         return f"Error writing document: {exc}"
@@ -96,10 +96,10 @@ async def create_document(user_email: str, title: str, body: str = "") -> str:
 
     try:
         result = await asyncio.to_thread(_sync)
-        brin_api_calls_total.labels(service="docs", operation="create").inc()
+        gws_api_calls_total.labels(service="docs", operation="create").inc()
         return result
     except (RuntimeError, OSError, ValueError) as exc:
-        brin_api_errors_total.labels(
+        gws_api_errors_total.labels(
             service="docs", error_type=type(exc).__name__
         ).inc()
         return f"Error creating document: {exc}"
