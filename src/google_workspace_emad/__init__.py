@@ -26,3 +26,5 @@ gws_token_refresh_failures_total = Counter(
     "Failed token refreshes",
     ["account"],
 )
+
+from google_workspace_emad.register import build_graph  # noqa: E402, F401
