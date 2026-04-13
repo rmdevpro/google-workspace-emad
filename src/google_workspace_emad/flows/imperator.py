@@ -25,11 +25,10 @@ _MAX_ITERATIONS = 15
 
 
 class BrinImperatorState(TypedDict):
+    payload: dict  # Full OpenAI request body
     messages: Annotated[list[AnyMessage], add_messages]
-    rogers_conversation_id: str | None
-    rogers_context_window_id: str | None
-    config: dict
-    final_response: str | None
+    conversation_id: str | None
+    response_text: str | None
     error: str | None
     iteration_count: int
 
@@ -631,21 +630,55 @@ def _load_system_prompt() -> str:
 # ── Graph nodes ──────────────────────────────────────────────────────────
 
 
-async def agent_node(state: BrinImperatorState) -> dict:
-    from google_workspace_emad.inference import get_llm, set_config
+async def init_node(state: BrinImperatorState) -> dict:
+    """Parse the OpenAI payload and set up the conversation."""
+    import uuid
+    from langchain_core.messages import HumanMessage
 
-    if state.get("config"):
-        set_config(state["config"])
+    payload = state.get("payload", {})
+
+    # Resolve conversation_id
+    conv_id = payload.get("conversation_id")
+    if conv_id == "new":
+        conv_id = str(uuid.uuid4())
+    elif not conv_id:
+        conv_id = f"default-{payload.get('model', 'brin')}"
+
+    # Parse messages
+    raw_messages = payload.get("messages", [])
+    lc_messages = []
+    for m in raw_messages:
+        role = m.get("role", "user")
+        content = m.get("content", "")
+        if role == "system":
+            lc_messages.append(SystemMessage(content=content))
+        elif role == "assistant":
+            lc_messages.append(AIMessage(content=content))
+        elif role == "tool":
+            lc_messages.append(ToolMessage(content=content, tool_call_id=m.get("tool_call_id", "unknown")))
+        else:
+            lc_messages.append(HumanMessage(content=content))
+
+    # Prepend system prompt if not present
+    has_system = any(isinstance(m, SystemMessage) for m in lc_messages)
+    if not has_system:
+        system_content = _load_system_prompt()
+        lc_messages = [SystemMessage(content=system_content)] + lc_messages
+
+    return {
+        "messages": lc_messages,
+        "conversation_id": conv_id,
+        "iteration_count": 0,
+    }
+
+
+async def agent_node(state: BrinImperatorState) -> dict:
+    from google_workspace_emad.inference import get_llm
 
     llm = get_llm("fast")
     llm_with_tools = llm.bind_tools(_TOOLS)
 
     messages = list(state["messages"])
-
-    has_system = any(isinstance(m, SystemMessage) for m in messages)
-    if not has_system:
-        system_content = _load_system_prompt()
-        messages = [SystemMessage(content=system_content)] + messages
 
     max_messages = 30
     if len(messages) > max_messages:
@@ -664,7 +697,6 @@ async def agent_node(state: BrinImperatorState) -> dict:
             "messages": [
                 AIMessage(content="I encountered an error processing your request.")
             ],
-            "final_response": "I encountered an error processing your request.",
             "error": str(exc),
         }
 
@@ -695,8 +727,14 @@ def finalize(state: BrinImperatorState) -> dict:
             and msg.content
             and not getattr(msg, "tool_calls", None)
         ):
-            return {"final_response": str(msg.content)}
-    return {"final_response": "[No response generated]"}
+            return {
+                "response_text": str(msg.content),
+                "conversation_id": state.get("conversation_id"),
+            }
+    return {
+        "response_text": "[No response generated]",
+        "conversation_id": state.get("conversation_id"),
+    }
 
 
 # ── Graph builder ────────────────────────────────────────────────────────
@@ -706,11 +744,13 @@ def build_imperator_graph(params: dict | None = None) -> StateGraph:
     tool_node_instance = ToolNode(_TOOLS)
 
     workflow = StateGraph(BrinImperatorState)
+    workflow.add_node("init_node", init_node)
     workflow.add_node("agent_node", agent_node)
     workflow.add_node("tool_node", tool_node_instance)
     workflow.add_node("finalize", finalize)
 
-    workflow.set_entry_point("agent_node")
+    workflow.set_entry_point("init_node")
+    workflow.add_edge("init_node", "agent_node")
     workflow.add_conditional_edges(
         "agent_node",
         should_continue,
@@ -719,4 +759,6 @@ def build_imperator_graph(params: dict | None = None) -> StateGraph:
     workflow.add_edge("tool_node", "agent_node")
     workflow.add_edge("finalize", END)
 
-    return workflow.compile()
+    from app.checkpointer import get_checkpointer
+
+    return workflow.compile(checkpointer=get_checkpointer())
